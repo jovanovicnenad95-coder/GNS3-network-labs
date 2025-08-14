@@ -1,0 +1,2 @@
+Lab Day 2 – OSPF Multi-Router Topology
+Configured OSPF between three routers (Cisco – Juniper – Cisco) using point-to-point links and loopbacks for router IDs. Verified OSPF adjacencies and routing tables on all devices. Final test: successful end-to-end ping to all loopbacks.
