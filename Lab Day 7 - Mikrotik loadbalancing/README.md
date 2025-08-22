@@ -1,0 +1,8 @@
+Today I implemented dual-WAN per-connection load balancing on MikroTik (ROS 7.1) with two Cisco edge routers.
+I created two policy routing tables (to-WAN1, to-WAN2) and used PCC (both-addresses-and-ports:2/x) in mangle to mark new LAN connections, then applied mark-routing only on LAN ingress so each flow sticks to a single WAN. I added one default route per table, plus NAT (LAN↔“internet” segment bypass + masquerade per routing-mark). For the lab, I also configured VRRP on WAN1 and WAN2 (shared VIP 192.168.2.1) so the “internet” hosts could reach either router, simulating a real upstream.
+
+I initially hit intermittent timeouts because mark-routing was applied to WAN-incoming packets (custom tables lacked LAN connected routes). Switching to action=lookup rules and restricting mark-routing to LAN traffic fixed it. Verified with mangle print stats, torch on ether1/ether2, and ping/traceroute from multiple LAN hosts to different 192.168.2.x targets. Tested failover using check-gateway=ping and distance-based defaults in main; traffic continued via the remaining WAN without interruption.
+
+PCAP note (VRRP-induced asymmetry)
+
+Because the “internet” segment uses VRRP with VIP 192.168.2.1 mastered by WAN1, return traffic from 192.168.2.0/24 will often arrive on WAN1 even when the request left via WAN2. You’ll see this in the PCAPs (pcaps/mikrotik-wan1.pcapng.pcap, pcaps/mikrotik-wan2.pcapng): the same 5-tuple’s replies hit WAN1 due to the upstream default gateway (VRRP VIP). This is expected and not a misconfiguration—MikroTik’s conntrack/NAT keeps the flow consistent and replies are delivered correctly.
