@@ -1,0 +1,5 @@
+Today I worked on implementing First Hop Redundancy Protocols (HSRP, VRRP, and GLBP) across three routers with PCs in the same VLAN. With HSRP, R1 acted as Active, R2 as Standby, and R3 as Listen. During failover, only one ping was lost before R2 took over as Active.
+
+With VRRP, R1 became the Master while R2 and R3 were Backup routers. When R1 failed, R2 assumed Master and again only one ping was lost.
+
+For GLBP, R1 operated as the AVG while R2 and R3 participated as forwarders. PC1 and PC2 received different virtual MAC addresses, showing load balancing in action. During failover, PC1 (whose forwarder failed) lost about six pings, while PC2 experienced no loss. This confirmed how GLBP provides load sharing but failover can affect hosts differently depending on their assigned forwarder.
